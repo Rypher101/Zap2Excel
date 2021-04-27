@@ -106,7 +106,7 @@
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.txtHTML);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Zap 2 Excel";
             this.ResumeLayout(false);
             this.PerformLayout();
 
