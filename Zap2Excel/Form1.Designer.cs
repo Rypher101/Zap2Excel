@@ -36,6 +36,7 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.txtLog = new System.Windows.Forms.RichTextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtHTML
@@ -90,15 +91,27 @@
             // 
             this.txtLog.Location = new System.Drawing.Point(12, 162);
             this.txtLog.Name = "txtLog";
+            this.txtLog.ReadOnly = true;
             this.txtLog.Size = new System.Drawing.Size(776, 263);
             this.txtLog.TabIndex = 7;
             this.txtLog.Text = "";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(487, 47);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(105, 82);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "Final Report";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(799, 437);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.btnStart);
             this.Controls.Add(this.btnOutput);
@@ -122,6 +135,7 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.RichTextBox txtLog;
+        private System.Windows.Forms.Button button1;
     }
 }
 

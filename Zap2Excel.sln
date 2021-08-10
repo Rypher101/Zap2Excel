@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.194
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1300
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zap2Excel", "Zap2Excel\Zap2Excel.csproj", "{2EDE0A4B-9CEA-4AC3-9E40-3B81209FB875}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{9F25BE82-9A32-460D-9485-DB597A37CB2E}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "Setup1\Setup1.vdproj", "{A7E997A9-E330-4836-9D7E-472D87B8B2A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +17,8 @@ Global
 		{2EDE0A4B-9CEA-4AC3-9E40-3B81209FB875}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EDE0A4B-9CEA-4AC3-9E40-3B81209FB875}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2EDE0A4B-9CEA-4AC3-9E40-3B81209FB875}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9F25BE82-9A32-460D-9485-DB597A37CB2E}.Debug|Any CPU.ActiveCfg = Debug
-		{9F25BE82-9A32-460D-9485-DB597A37CB2E}.Release|Any CPU.ActiveCfg = Release
+		{A7E997A9-E330-4836-9D7E-472D87B8B2A4}.Debug|Any CPU.ActiveCfg = Debug
+		{A7E997A9-E330-4836-9D7E-472D87B8B2A4}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

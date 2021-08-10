@@ -15,5 +15,6 @@ namespace Zap2Excel
 
         public List<string[]> URLs = new List<string[]>();
         public int CWE { get; set; }
+        public string FinalURLs { get; set; }
     }
 }

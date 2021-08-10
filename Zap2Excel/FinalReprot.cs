@@ -11,26 +11,27 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
+
 namespace Zap2Excel
 {
-    public partial class Form1 : Form
+    public partial class FinalReprot : Form
     {
-        public Form1()
+        public FinalReprot()
         {
             InitializeComponent();
         }
 
-        private void btnHTML_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             openFileDialog1.Title = "Select HTML file";
             openFileDialog1.Filter = "HTML file | *.html";
-            if(openFileDialog1.ShowDialog() == DialogResult.OK)
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 txtHTML.Text = openFileDialog1.FileName;
             }
         }
 
-        private void btnOutput_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
             folderBrowserDialog1.Description = "Select output location";
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -39,7 +40,7 @@ namespace Zap2Excel
             }
         }
 
-        private void btnStart_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
             txtLog.Text = "";
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
@@ -55,7 +56,7 @@ namespace Zap2Excel
                 }
                 htmlDoc.Load(txtHTML.Text);
 
-                if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Count() >0)
+                if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Count() > 0)
                 {
                     foreach (var item in htmlDoc.ParseErrors)
                     {
@@ -65,7 +66,7 @@ namespace Zap2Excel
                 AppendToLog("HTML read successfull");
 
                 AppendToLog("Selecting tables");
-                var tables = htmlDoc.DocumentNode.Descendants().Where(x=>x.HasClass("results")).ToList();
+                var tables = htmlDoc.DocumentNode.Descendants().Where(x => x.HasClass("results")).ToList();
                 AppendToLog("Selecting tables completed. Table count :" + tables.Count);
 
                 AppendToLog("Creating objects");
@@ -74,33 +75,36 @@ namespace Zap2Excel
                 {
                     var tmpTable = new ScanTable();
                     var rows = item.SelectNodes(".//tr").ToList();
-                    tmpTable.Severity = rows.First().SelectNodes(".//th").ElementAt(0).InnerText;
-                    tmpTable.Vulnerability = rows.First().SelectNodes(".//th").ElementAt(1).InnerText;
+                    var tmpSev = rows.First().SelectNodes(".//th").ElementAt(0).InnerText.Split(' ');
+                    if (tmpSev[0] == "High")
+                    {
+                        tmpTable.Severity = "High";
+                    }
+                    else if (tmpSev[0] == "Medium")
+                    {
+                        tmpTable.Severity = "Medium";
+                    }
+                    else if (tmpSev[0] == "Low")
+                    {
+                        tmpTable.Severity = "Low";
+                    }
+                    else if (tmpSev[0] == "Informational")
+                    {
+                        tmpTable.Severity = "Informational";
+                    }
+
                     rows.RemoveAt(0);
                     tmpTable.Description = rows.First().SelectNodes(".//td").ElementAt(1).InnerText;
+                    tmpTable.FinalURLs = "";
                     rows.RemoveAt(0);
 
-                    var urlFound = false;
-                    var tmpURL = new string[2];
                     foreach (var item2 in rows)
                     {
-                        if (item2.SelectSingleNode(".//td").GetAttributeValue("class",null) == "indent1")
+                        if (item2.SelectSingleNode(".//td").GetAttributeValue("class", null) == "indent1")
                         {
-                            tmpURL[0]= item2.SelectNodes(".//td").ElementAt(1).InnerText;
-                            urlFound = true;
-                        }
-                        else if (urlFound)
-                        {
-                            tmpURL[1] = item2.SelectNodes(".//td").ElementAt(1).InnerText;
-                            tmpTable.URLs.Add(tmpURL);
-                            tmpURL = new string[2];
-                            urlFound = false;
+                            tmpTable.FinalURLs = tmpTable.FinalURLs + item2.SelectNodes(".//td").ElementAt(1).InnerText + Environment.NewLine;
                         }
 
-                        if (item2.SelectSingleNode(".//td").InnerText == "CWE Id")
-                        {
-                            tmpTable.CWE = int.Parse(item2.SelectNodes(".//td").ElementAt(1).InnerText);
-                        }
                     }
 
                     i++;
@@ -120,56 +124,53 @@ namespace Zap2Excel
                 Excel.Workbook xlWorkBook;
                 Excel.Worksheet xlWorkSheet;
                 object misValue = System.Reflection.Missing.Value;
+                var xlsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Zap to Excel", "FinalReport.xls");
 
-                xlWorkBook = xlApp.Workbooks.Add(Type.Missing);
+                xlWorkBook = xlApp.Workbooks.Open(xlsPath, 0, true, 5, "", "", true, Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0); ;
                 xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
 
-                xlWorkSheet.Cells[1, 1] = "Severity";
-                xlWorkSheet.Cells[1, 2] = "Vulnerability";
-                xlWorkSheet.Cells[1, 3] = "Desctiption";
-                xlWorkSheet.Cells[1, 4] = "URL";
-                xlWorkSheet.Cells[1, 5] = "Method";
-                xlWorkSheet.Cells[1, 6] = "CWE ID";
-                xlWorkSheet.Cells[1, 7] = "Comments";
-
                 AppendToLog("\t Adding data to table");
-                var row = 2;
+                var row = 3;
                 foreach (var item in objTable)
                 {
-                    xlWorkSheet.Cells[row,1] = item.Severity;
-                    xlWorkSheet.Cells[row,2] = item.Vulnerability;
-                    xlWorkSheet.Cells[row,3] = item.Description;
-                    xlWorkSheet.Cells[row,6] = item.CWE;
-                    foreach (var item2 in item.URLs)
+                    xlWorkSheet.Cells[row, 1] = row - 2;
+
+                    xlWorkSheet.Cells[row, 2] = item.Severity;
+                    xlWorkSheet.Cells[row, 2].Font.Color = ColorTranslator.ToOle(Color.White);
+                    switch (item.Severity)
                     {
-                        xlWorkSheet.Cells[row,4] = item2[0];
-                        xlWorkSheet.Cells[row,5] = item2[1];
-                        row++;
+                        case "High":
+                            xlWorkSheet.Cells[row, 2].Interior.Color = ColorTranslator.ToOle(Color.Red);
+                            break;
+                        case "Medium":
+                            xlWorkSheet.Cells[row, 2].Interior.Color = ColorTranslator.ToOle(Color.Orange);
+                            break;
+                        case "Low":
+                            xlWorkSheet.Cells[row, 2].Interior.Color = ColorTranslator.ToOle(Color.Yellow);
+                            xlWorkSheet.Cells[row, 2].Font.Color = ColorTranslator.ToOle(Color.Black);
+                            break;
+                        case "Informational":
+                            xlWorkSheet.Cells[row, 2].Interior.Color = ColorTranslator.ToOle(Color.Blue);
+                            break;
+                        default:
+                            break;
                     }
-                    
+
+                    xlWorkSheet.Cells[row, 4] = item.Description;
+                    xlWorkSheet.Cells[row, 5] = txtJira.Text;
+                    xlWorkSheet.Cells[row, 8] = item.FinalURLs;
+                    row++;
                 }
+
+                xlWorkSheet.Range[xlWorkSheet.Cells[3, 2], xlWorkSheet.Cells[row - 1, 11]].Style.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                xlWorkSheet.Range[xlWorkSheet.Cells[3, 1], xlWorkSheet.Cells[row - 1, 1]].Style.VerticalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                xlWorkSheet.Range[xlWorkSheet.Cells[3, 5], xlWorkSheet.Cells[row - 1, 5]].Style.VerticalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                xlWorkSheet.Range[xlWorkSheet.Cells[3, 1], xlWorkSheet.Cells[row - 1, 11]].Font.Size = 16;
+                xlWorkSheet.Range[xlWorkSheet.Cells[3, 1], xlWorkSheet.Cells[row - 1, 11]].Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
                 AppendToLog("\t Adding data to table complete");
 
-                AppendToLog("\t Merging cells");
-                row = 2;
-                foreach (var item in objTable)
-                {
-                    var severityRange = xlWorkSheet.Range[xlWorkSheet.Cells[row, 1], xlWorkSheet.Cells[row + item.URLs.Count-1, 1]];
-                    var vulnerabilityRange = xlWorkSheet.Range[xlWorkSheet.Cells[row, 2], xlWorkSheet.Cells[row + item.URLs.Count-1, 2]];
-                    var descriptionRange = xlWorkSheet.Range[xlWorkSheet.Cells[row, 3], xlWorkSheet.Cells[row + item.URLs.Count-1, 3]];
-                    var cweRange = xlWorkSheet.Range[xlWorkSheet.Cells[row, 6], xlWorkSheet.Cells[row + item.URLs.Count-1, 6]];
-
-                    severityRange.Merge();
-                    vulnerabilityRange.Merge();
-                    descriptionRange.Merge();
-                    cweRange.Merge();
-
-                    row += item.URLs.Count;
-                }
-                AppendToLog("\t Merging cells complete");
-
                 AppendToLog("\t Saving excel file");
-                string fileName = txtOutput.Text +"\\"+ Path.GetFileNameWithoutExtension(txtHTML.Text) + ".xlsx";
+                string fileName = txtOutput.Text + "\\" + Path.GetFileNameWithoutExtension(txtHTML.Text) + ".xls";
                 xlWorkBook.SaveAs(fileName);
                 xlWorkBook.Close();
                 xlApp.Quit();
@@ -186,7 +187,6 @@ namespace Zap2Excel
                 AppendToLog("Error : " + ex.Message.ToString(), true);
             }
         }
-
         private void AppendToLog(string txt, bool isError = false)
         {
             if (isError)
@@ -197,12 +197,6 @@ namespace Zap2Excel
             txtLog.SelectionColor = txtLog.ForeColor;
             txtLog.AppendText(Environment.NewLine);
             txtLog.ScrollToCaret();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var final = new FinalReprot();
-            final.Show();
         }
     }
 }
